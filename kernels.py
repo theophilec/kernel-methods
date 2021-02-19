@@ -14,7 +14,8 @@ class SubstringKernel():
         self.n = n
         self.lambd = lambd 
 
-    # @jit(nopython=True)
+    @staticmethod
+    @jit(nopython=True)
     def computeKernel(self, args):
         '''
             args is a tuple (s1, s2) where s1 and s2 are the two strings

@@ -2,9 +2,9 @@ import pandas as pd
 import numpy as np 
 
 def train_val_single_dataset(i, VALIDATION_RATIO = 0.2):
-    tr = np.array(pd.read_csv('data/Xtr{}.csv'.format(i))["seq"])[:10]
-    tr_feats = np.loadtxt(open("data/Xtr{}_mat100.csv".format(i), "rb"), delimiter=" ")[:10]
-    tr_labels = np.array(pd.read_csv('data/Ytr{}.csv'.format(i))["Bound"])[:10]
+    tr = np.array(pd.read_csv('data/Xtr{}.csv'.format(i))["seq"])
+    tr_feats = np.loadtxt(open("data/Xtr{}_mat100.csv".format(i), "rb"), delimiter=" ")
+    tr_labels = np.array(pd.read_csv('data/Ytr{}.csv'.format(i))["Bound"])
 
     n = tr.shape[0]
     tr_labels[tr_labels == 0] = -1
@@ -73,5 +73,7 @@ def load_kernels(prefix):
         kernels_val.append(np.loadtxt("{}_train_val_{}.txt".format(prefix, i)))
         kernels_train.append(np.loadtxt("{}_train_train_{}.txt".format(prefix, i)))
         kernels_test.append(np.loadtxt("{}_train_test_{}.txt".format(prefix, i)))
+        labels_train.append(np.loadtxt("{}_train_labels_{}.txt".format(prefix, i)))
+        labels_vals.append(np.loadtxt("{}_val_labels_{}.txt".format(prefix, i)))
 
-    return kernels_train, kernels_val, kernels_test
+    return kernels_train, labels_train, kernels_val, labels_vals, kernels_test
