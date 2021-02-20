@@ -67,13 +67,15 @@ def parse_output(predictions, filename):
             count += 1
                 
 def load_kernels(prefix):
-    kernels_train, kernels_val, kernels_test = [], [], []
+    kernels_train, kernels_val, kernels_test, labels_train, labels_vals, feats_train, feats_val = [], [], [], [], [], [], []
 
     for i in range(3):
         kernels_val.append(np.loadtxt("{}_train_val_{}.txt".format(prefix, i)))
         kernels_train.append(np.loadtxt("{}_train_train_{}.txt".format(prefix, i)))
         kernels_test.append(np.loadtxt("{}_train_test_{}.txt".format(prefix, i)))
-        labels_train.append(np.loadtxt("{}_train_labels_{}.txt".format(prefix, i)))
-        labels_vals.append(np.loadtxt("{}_val_labels_{}.txt".format(prefix, i)))
+        labels_train.append(np.loadtxt("{}_labels_train_{}.txt".format(prefix, i)))
+        labels_vals.append(np.loadtxt("{}_labels_val_{}.txt".format(prefix, i)))
+        feats_train.append(np.loadtxt("{}_feats_train_{}.txt".format(prefix, i)))
+        feats_val.append(np.loadtxt("{}_feats_val_{}.txt".format(prefix, i)))
 
-    return kernels_train, labels_train, kernels_val, labels_vals, kernels_test
+    return kernels_train, labels_train, kernels_val, labels_vals, kernels_test, feats_train, feats_val
