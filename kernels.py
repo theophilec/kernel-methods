@@ -5,10 +5,19 @@ from abc import ABC
 
 class LinearKernel():
 
-    @staticmethod
-    def computeKernel(args):
-        return args[0].T @ args[1] 
+    def computeVectorizedKernel(self, X,Y):
+        return X @ Y.T
 
+class GaussianKernel():
+    def __init__(self, sigma):
+        self.sigma = sigma 
+
+    def computeVectorizedKernel(self, X, Y):
+        dist = np.linalg.norm((X[:,None]-Y), axis = 2)**2
+        K = np.exp(-dist/self.sigma**2)
+
+        return K
+    
 class SubstringKernel():
 
     def __init__(self, n, lambd):
