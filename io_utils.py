@@ -28,7 +28,7 @@ def train_val_dataset():
     raw_train_3, raw_val_3, feats_train_3, feats_val_3, labels_train_3, labels_val_3 = train_val_single_dataset(2)
 
     all_train_raw = np.vstack((raw_train_1, raw_train_2, raw_train_3))
-    all_train_raw = np.vstack((raw_train_1, raw_train_2, raw_train_3))
+    all_val_raw = np.vstack((raw_val_1, raw_val_2, raw_val_3))
 
     
     all_train_feats = np.vstack((feats_train_1, feats_train_2, feats_train_3))
@@ -38,7 +38,7 @@ def train_val_dataset():
     all_val_labels = np.hstack((labels_val_1, labels_val_2, labels_val_3))
 
     
-    return all_train_raw, all_train_raw, all_train_feats, all_val_feats, all_train_labels, all_val_labels
+    return all_train_raw, all_val_raw, all_train_feats, all_val_feats, all_train_labels, all_val_labels
 
 def load_raw_test(i):
     test = np.array(pd.read_csv('data/Xte{}.csv'.format(i))["seq"])
