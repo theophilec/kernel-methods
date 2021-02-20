@@ -56,4 +56,4 @@ class SubstringKernel():
         return K[-1]
     
     def computeKernel(self, args):
-        self._computeKernel(args, self.lambd, self.n)
+        return self._computeKernel(args, self.lambd, self.n)
