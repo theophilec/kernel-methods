@@ -32,7 +32,7 @@ def train_val_dataset():
 
     
     all_train_feats = np.vstack((feats_train_1, feats_train_2, feats_train_3))
-    all_val_feats = np.vstack((feats_train_1, feats_val_2, feats_val_3))
+    all_val_feats = np.vstack((feats_val_1, feats_val_2, feats_val_3))
     
     all_train_labels = np.hstack((labels_train_1, labels_train_2, labels_train_3))
     all_val_labels = np.hstack((labels_val_1, labels_val_2, labels_val_3))
