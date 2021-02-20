@@ -5,6 +5,7 @@ from abc import ABC
 
 class LinearKernel():
 
+    @staticmethod
     def computeKernel(args):
         return args[0].T @ args[1] 
 
@@ -16,7 +17,7 @@ class SubstringKernel():
 
     @staticmethod
     @jit(nopython=True)
-    def computeKernel(self, args):
+    def _computeKernel(args, lambd, n ):
         '''
             args is a tuple (s1, s2) where s1 and s2 are the two strings
         '''
@@ -25,31 +26,34 @@ class SubstringKernel():
         n1, n2 = len(s1), len(s2)
         prev = np.zeros((n1, n2))
         nxt = np.zeros((n1, n2))
-        K = np.zeros(self.n)
+        K = np.zeros(n)
         for i in range(n1):
             for j in range(n2):
                 if s1[i] == s2[j]:
-                    prev[i,j] = self.lambd**2
+                    prev[i,j] = lambd**2
                     K[0] += prev[i,j]
 
-        K[0] /= self.lambd ** 2
-        for l in range(1, self.n):
+        K[0] /= lambd ** 2
+        for l in range(1, n):
             B = np.zeros((n1, n2))
 
             for i in range(0, n1):
                 for j in range(0,n2):
                     B[i,j] = prev[i,j]
                     if i != 0: # Problem w/ -1 indexing in Python....
-                        B[i,j] += self.lambd * B[i-1,j]
+                        B[i,j] += lambd * B[i-1,j]
                     if j!=0:
-                        B[i,j] += self.lambd * B[i,j-1]
+                        B[i,j] += lambd * B[i,j-1]
                     if i!=0 and j!=0:
-                        B[i,j] -= self.lambd **2 * B[i-1, j-1]
+                        B[i,j] -= lambd **2 * B[i-1, j-1]
                         
                     if s1[i] == s2[j] and i-1 !=0 and j-1 != 0 :
-                        nxt[i,j] = self.lambd ** 2 * B[i-1,j-1]
+                        nxt[i,j] = lambd ** 2 * B[i-1,j-1]
                         K[l] += nxt[i,j]
 
-            K[l] /= self.lambd ** (2*(l+1))
+            K[l] /= lambd ** (2*(l+1))
             prev = nxt.copy()
         return K[-1]
+    
+    def computeKernel(self, args):
+        self._computeKernel(args, self.lambd, self.n)
