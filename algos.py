@@ -58,11 +58,11 @@ class KernelRidgeRegression(Algorithm):
 
     def fit(self, training_kernel, training_labels, reg_param=0):
         n = training_kernel.shape[0]
-        alpha = np.linalg.inv(training_kernel + reg_param * n * np.eye(n)) @ training_labels
+        alpha = np.linalg.solve(training_kernel + reg_param * n * np.eye(n),training_labels)
 
         self.alpha = alpha 
         self.reg_param = reg_param
-
+        
     def predict(self, mat):
         predictions = np.einsum('i, ij->j', self.alpha, mat)
         return predictions 

@@ -17,7 +17,45 @@ class GaussianKernel():
         K = np.exp(-dist/self.sigma**2)
 
         return K
+
+class WeightedDegreeKernel():
+    def __init__(self, d):
+        self.d = d
     
+    @staticmethod
+    def _computeKernel(args, d):
+        '''
+            Using blocks to have O(|s|) complexity
+            Weights are modified to account for blocks
+        '''
+        s1, s2 = args[0], args[1]
+        n1, n2 = len(s1), len(s2)
+
+        count = 0
+        weights = 0
+        i = 0
+
+        while i < n1:
+            if s1[i] != s2[i]:
+                i += 1
+                continue
+            
+            while i < n1 and s1[i] == s2[i]:
+                count += 1 
+                i += 1
+            
+            if count < d:
+                weights += count * (-count ** 2 + 3 * d * count + 3 * d +1 ) / (3 * d * (d+1))
+            else:
+                weights += 1/3 * (3 * count - d + 1)
+
+            count = 0
+
+        return weights
+
+    def computeKernel(self, args):
+        return self._computeKernel(args, self.d) 
+
 class SubstringKernel():
 
     def __init__(self, n, lambd):
