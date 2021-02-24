@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt 
 from abc import ABC
 import cvxpy as cp
+from tqdm import tqdm 
 
 ''' 
 Usage:
@@ -35,7 +36,7 @@ class Algorithm(ABC):
         
         return error 
 
-    def searchBestParameters(self,training_kernel, training_labels, val_kernel, val_labels, grid):
+    def searchBestParameters(self,training_kernel, training_labels, val_kernel, val_labels, grid, no_plot = True):
         '''
             grid : a list of floats representing all regularization parameters
         '''
@@ -46,14 +47,73 @@ class Algorithm(ABC):
             error = self.evaluatePerformance(val_kernel, val_labels, verbose = False)
             all_errors.append(error)
         
-        plt.plot(grid, all_errors, label="Validation error")
-        plt.xscale('log')
-        plt.legend(loc='upper left')
-        plt.xlabel(r"$\lambda$", fontsize=16)
-        plt.show()
+        if not no_plot:
+            plt.plot(grid, all_errors, label="Validation error")
+            plt.xscale('log')
+            plt.legend(loc='upper left')
+            plt.xlabel(r"$\lambda$", fontsize=16)
+            plt.show()
 
         return all_errors
+    
+    def cross_validate(self, exp, kernels, grid, validation_ratio = 0.2, N_CROSS_VAL = 5):
+        '''
+            Performs cross validation: splits the dataset in N_VAL chunks and alternatively 
+            uses the i-th chunk as the validation set and all others for training
 
+            - experience (class Experience) 
+            - kernels (list of numpy array) : list of 2000x2000 matrices K(x_i, x_j)
+            - grid (numpy array) : array of parameters to try  
+            Optional parameters
+                - N_VAL (int) : Number of cross-validation slices
+        '''
+
+        n_tot = kernels[0].shape[0]
+        
+        n_train = int((1-validation_ratio) * n_tot)
+        n_val = n_tot - n_train 
+        
+        n_grid = grid.shape[0]
+        n_datasets = len(kernels)
+        errors = np.zeros((n_datasets, n_grid))
+
+        print("Cross validation with {} slices. Training set: {}, Validation set: {}".format(N_CROSS_VAL, n_train, n_val))
+
+        for i in tqdm(range(N_CROSS_VAL)):
+            for n in range(n_datasets):
+                train = np.zeros((n_train, n_train))
+                val = np.zeros((n_train, n_val))
+                
+
+                val[:i*n_val] = kernels[n][:i*n_val, i*n_val:(i+1)*n_val]
+                val[i*n_val:] = kernels[n][(i+1)*n_val:, i*n_val:(i+1)*n_val]
+
+                train[:i*n_val, :i*n_val] = kernels[n][:i*n_val, :i*n_val]
+
+                if i != N_CROSS_VAL - 1:
+                    train[i*n_val:, i*n_val:] = kernels[n][(i+1)*n_val:, (i+1)*n_val:]
+
+                if i != 0 and i != N_CROSS_VAL - 1:
+                    train[i*n_val:, :i*n_val] = kernels[n][(i+1)*n_val:, :i*n_val]
+                    train[:i*n_val, i*n_val:] = kernels[n][:i*n_val, (i+1)*n_val:]
+                
+                lbl_train = np.zeros(n_train)
+                
+                if i == N_CROSS_VAL - 1:
+                    lbl_train = exp.labels[n][:n_train]
+                    lbl_val = exp.labels[n][n_train:]
+                else:
+                    lbl_train = np.concatenate((exp.labels[n][:i*n_val], exp.labels[n][(i+1)*n_val:]))
+                    lbl_val = exp.labels[n][i*n_val:(i+1)*n_val]
+
+                errors[n] += self.searchBestParameters(train, lbl_train, val, lbl_val, grid)
+            
+        best_idx = np.argmin(errors[0] + errors[1] + errors[2])
+
+        print("Best parameter: {}".format(grid[best_idx]))
+
+        return best_idx
+        
 class KernelRidgeRegression(Algorithm):
 
     def fit(self, training_kernel, training_labels, reg_param=0):
