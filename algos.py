@@ -15,7 +15,8 @@ class Algorithm(ABC):
     def __init__(self):
         self.alpha = None
         self.reg_param = 0
-
+        self.beta = None
+        
     def fit(self, kernel, labels, reg_param):
         '''
             kernel: nxn kernel matrix
@@ -78,53 +79,52 @@ class Algorithm(ABC):
         errors = np.zeros((n_datasets, n_grid))
 
         print("Cross validation with {} slices. Training set: {}, Validation set: {}".format(N_CROSS_VAL, n_train, n_val))
+        idx = np.arange(n_tot)
+        np.random.shuffle(idx)
 
         for i in tqdm(range(N_CROSS_VAL)):
             for n in range(n_datasets):
+                train_slice = np.concatenate((idx[:i*n_val], idx[(i+1)*n_val:]))
+                val_slice = idx[i*n_val:(i+1)*n_val]
+
                 train = np.zeros((n_train, n_train))
                 val = np.zeros((n_train, n_val))
-                
 
-                val[:i*n_val] = kernels[n][:i*n_val, i*n_val:(i+1)*n_val]
-                val[i*n_val:] = kernels[n][(i+1)*n_val:, i*n_val:(i+1)*n_val]
+                train = kernels[n][train_slice, train_slice]
+                val = kernels[n][:, val_slice][train_slice]
 
-                train[:i*n_val, :i*n_val] = kernels[n][:i*n_val, :i*n_val]
-
-                if i != N_CROSS_VAL - 1:
-                    train[i*n_val:, i*n_val:] = kernels[n][(i+1)*n_val:, (i+1)*n_val:]
-
-                if i != 0 and i != N_CROSS_VAL - 1:
-                    train[i*n_val:, :i*n_val] = kernels[n][(i+1)*n_val:, :i*n_val]
-                    train[:i*n_val, i*n_val:] = kernels[n][:i*n_val, (i+1)*n_val:]
-                
-                lbl_train = np.zeros(n_train)
-                
-                if i == N_CROSS_VAL - 1:
-                    lbl_train = exp.labels[n][:n_train]
-                    lbl_val = exp.labels[n][n_train:]
-                else:
-                    lbl_train = np.concatenate((exp.labels[n][:i*n_val], exp.labels[n][(i+1)*n_val:]))
-                    lbl_val = exp.labels[n][i*n_val:(i+1)*n_val]
-
+                lbl_train = exp.labels[n][train_slice]
+                lbl_val = exp.labels[n][val_slice]
+            
                 errors[n] += self.searchBestParameters(train, lbl_train, val, lbl_val, grid)
             
         best_idx = np.argmin(errors[0] + errors[1] + errors[2])
 
         print("Best parameter: {}".format(grid[best_idx]))
-
+        print("Score 1: {}".format(1-errors[0][best_idx]/N_CROSS_VAL))
+        print("Score 2: {}".format(1-errors[1][best_idx]/N_CROSS_VAL))
+        print("Score 3: {}".format(1-errors[2][best_idx]/N_CROSS_VAL))
         return best_idx
         
 class KernelRidgeRegression(Algorithm):
 
-    def fit(self, training_kernel, training_labels, reg_param=0):
+    def fit(self, training_kernel, training_labels, reg_param=0, fit_bias = False):
         n = training_kernel.shape[0]
-        alpha = np.linalg.solve(training_kernel + reg_param * n * np.eye(n),training_labels)
-
+        if not fit_bias:
+            alpha = np.linalg.solve(training_kernel + reg_param * n * np.eye(n),training_labels)
+        else:
+            H = np.linalg.inv(training_kernel+reg_param * n * np.eye(n))
+            beta =  (-reg_param * H @ training_labels) @ np.ones(n) * 1/(1 + 1 / n * np.ones(n).T @ training_kernel @ H.T @ np.ones(n))
+            alpha = np.linalg.solve(training_kernel + reg_param * n * np.eye(n), training_labels - beta * np.ones(n))
+            print(beta)
+            self.beta = beta
         self.alpha = alpha 
         self.reg_param = reg_param
         
     def predict(self, mat):
         predictions = np.einsum('i, ij->j', self.alpha, mat)
+        if self.beta is not None:
+            predictions += self.beta
         return predictions 
 
 class SVM(Algorithm):
