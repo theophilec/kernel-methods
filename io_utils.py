@@ -17,6 +17,8 @@ class Experiment:
         tr_feats = np.loadtxt(open("data/Xtr{}_mat100.csv".format(i), "rb"), delimiter=" ")
         tr_labels = np.array(pd.read_csv('data/Ytr{}.csv'.format(i))["Bound"])
 
+        tr_labels[tr_labels == 0] = -1
+        
         return tr, tr_feats, tr_labels
 
     def load_all_test_datasets(self):
