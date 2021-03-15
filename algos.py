@@ -57,7 +57,7 @@ class Algorithm(ABC):
 
         return all_errors
     
-    def cross_validate(self, exp, kernels, grid, validation_ratio = 0.2, N_CROSS_VAL = 5):
+    def cross_validate(self, exp, kernels, grid, N_CROSS_VAL = 5):
         '''
             Performs cross validation: splits the dataset in N_VAL chunks and alternatively 
             uses the i-th chunk as the validation set and all others for training
@@ -66,11 +66,11 @@ class Algorithm(ABC):
             - kernels (list of numpy array) : list of 2000x2000 matrices K(x_i, x_j)
             - grid (numpy array) : array of parameters to try  
             Optional parameters
-                - N_VAL (int) : Number of cross-validation slices
+                - N_CROSS_VAL (int) : Number of cross-validation slices
         '''
 
         n_tot = kernels[0].shape[0]
-        
+        validation_ratio = 1 / N_CROSS_VAL
         n_train = int((1-validation_ratio) * n_tot)
         n_val = n_tot - n_train 
         
