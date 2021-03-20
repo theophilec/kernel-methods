@@ -84,8 +84,8 @@ class SubstringKernel():
         for l in range(1, n):
             B = np.zeros((n1, n2))
 
-            for i in range(0, n1):
-                for j in range(0,n2):
+            for i in range(l, n1):
+                for j in range(l,n2):
                     B[i,j] = prev[i,j]
                     if i != 0: # Problem w/ -1 indexing in Python....
                         B[i,j] += lambd * B[i-1,j]
