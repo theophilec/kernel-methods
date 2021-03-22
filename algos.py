@@ -89,13 +89,10 @@ class Algorithm(ABC):
 
                 train = np.zeros((n_train, n_train))
                 val = np.zeros((n_train, n_val))
-
-                train = kernels[n][train_slice, train_slice]
+                train = kernels[n][:,train_slice][train_slice]
                 val = kernels[n][:, val_slice][train_slice]
-
                 lbl_train = exp.labels[n][train_slice]
                 lbl_val = exp.labels[n][val_slice]
-            
                 errors[n] += self.searchBestParameters(train, lbl_train, val, lbl_val, grid)
             
         best_idx = np.argmin(errors[0] + errors[1] + errors[2])
