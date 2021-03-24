@@ -3,9 +3,10 @@ import numpy as np
 from tqdm import tqdm
 import multiprocessing as mp
 import time
+import os 
 
 np.random.seed(42)  # remove ?
-
+DATA_ROOT = os.path.join(os.path.dirname(__file__), "../data")
 class Experiment:
     def __init__(self):
         self.labels = []
@@ -15,9 +16,9 @@ class Experiment:
         self.feats_test = []
 
     def train_val_single_dataset(self, i, VALIDATION_RATIO = 0.2):
-        tr = np.array(pd.read_csv('data/Xtr{}.csv'.format(i))["seq"])
-        tr_feats = np.loadtxt(open("data/Xtr{}_mat100.csv".format(i), "rb"), delimiter=" ")
-        tr_labels = np.array(pd.read_csv('data/Ytr{}.csv'.format(i))["Bound"])
+        tr = np.array(pd.read_csv(os.path.join(DATA_ROOT, 'Xtr{}.csv'.format(i)))["seq"])
+        tr_feats = np.loadtxt(open(os.path.join(DATA_ROOT, "Xtr{}_mat100.csv".format(i)), "rb"), delimiter=" ")
+        tr_labels = np.array(pd.read_csv(os.path.join(DATA_ROOT, 'Ytr{}.csv'.format(i)))["Bound"])
 
         tr_labels[tr_labels == 0] = -1
 
@@ -25,8 +26,8 @@ class Experiment:
 
     def load_all_test_datasets(self):
         for i in range(3):
-            self.feats_test.append(np.loadtxt(open("data/Xte{}_mat100.csv".format(i), "rb"), delimiter=" "))
-            self.raw_test.append(np.array(pd.read_csv('data/Xte{}.csv'.format(i))["seq"]))
+            self.feats_test.append(np.loadtxt(open(os.path.join(DATA_ROOT, "Xte{}_mat100.csv".format(i)), "rb"), delimiter=" "))
+            self.raw_test.append(np.array(pd.read_csv(os.path.join(DATA_ROOT, 'Xte{}.csv'.format(i)))["seq"]))
 
     def create_new_experiment(self):
         for i in range(3):
@@ -82,7 +83,7 @@ def train_val_dataset(exp):
     return all_train_raw, all_train_feats, all_train_labels
 
 def load_raw_test(i):
-    test = np.array(pd.read_csv('data/Xte{}.csv'.format(i))["seq"])
+    test = np.array(pd.read_csv(os.path.join(DATA_ROOT, 'Xte{}.csv'.format(i)))["seq"])
     return test
 
 
