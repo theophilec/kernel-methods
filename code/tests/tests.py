@@ -1,11 +1,15 @@
-import io_utils
-import algos
-import kernels
+import sys 
+sys.path.insert(0,'..')
 
 import os 
 import numpy as np 
 from tqdm import tqdm 
 import shutil
+
+import io_utils
+import algos
+import kernels
+
 # Create dataset 
 print("Testing data preprocessing...")
 exp = io_utils.Experiment()
