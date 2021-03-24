@@ -30,13 +30,13 @@ SAVE = True
 
 KERNEL = "SS"
 
-L = 7
+L = 3
 for W in [0.1, 0.3, 0.5, 0.7]:
 
     if KERNEL == "WD":
         kernel_name = KERNEL + "_" + str(L)
     elif KERNEL == "SS":
-        kernel_name = KERNEL + "_" + str(L) + "_" + "0" + str(10 * W)
+        kernel_name = KERNEL + "_" + str(L) + "_" + "0" + str(int(10 * W))
 
     exp = io_utils.Experiment()
 
