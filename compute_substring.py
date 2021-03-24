@@ -92,12 +92,13 @@ def pooled_kernel_test_compute(exp, kern, N_PROCESS):
 
     return kernels_wd_train
 
-for W in [0.2]:
+L = 3
+for W in [0.1, 0.3, 0.5, 0.7]:
 
     if KERNEL == "WD":
         kernel_name = KERNEL + "_" + str(L)
     elif KERNEL == "SS":
-        kernel_name = KERNEL + "_" + str(L) + "_" + "0" + str(10 * W)
+        kernel_name = KERNEL + "_" + str(L) + "_" + "0" + str(int(10 * W))
 
     exp = io_utils.Experiment()
 
