@@ -1,5 +1,5 @@
-import numpy as np 
-from numba import jit 
+import numpy as np
+from numba import jit
 from abc import ABC
 
 
@@ -10,7 +10,7 @@ class LinearKernel():
 
 class GaussianKernel():
     def __init__(self, sigma):
-        self.sigma = sigma 
+        self.sigma = sigma
 
     def computeVectorizedKernel(self, X, Y):
         dist = np.linalg.norm((X[:,None]-Y), axis = 2)**2
@@ -21,7 +21,7 @@ class GaussianKernel():
 class WeightedDegreeKernel():
     def __init__(self, d):
         self.d = d
-    
+
     @staticmethod
     def _computeKernel(args, d):
         '''
@@ -39,11 +39,11 @@ class WeightedDegreeKernel():
             if s1[i] != s2[i]:
                 i += 1
                 continue
-            
+
             while i < n1 and s1[i] == s2[i]:
-                count += 1 
+                count += 1
                 i += 1
-            
+
             if count < d:
                 weights += count * (-count ** 2 + 3 * d * count + 3 * d +1 ) / (3 * d * (d+1))
             else:
@@ -54,13 +54,13 @@ class WeightedDegreeKernel():
         return weights
 
     def computeKernel(self, args):
-        return self._computeKernel(args, self.d) 
+        return self._computeKernel(args, self.d)
 
 class SubstringKernel():
 
     def __init__(self, n, lambd):
         self.n = n
-        self.lambd = lambd 
+        self.lambd = lambd
 
     @staticmethod
     @jit(nopython=True)
@@ -93,7 +93,7 @@ class SubstringKernel():
                         B[i,j] += lambd * B[i,j-1]
                     if i!=0 and j!=0:
                         B[i,j] -= lambd **2 * B[i-1, j-1]
-                        
+
                     if s1[i] == s2[j] and i-1 !=0 and j-1 != 0 :
                         nxt[i,j] = lambd ** 2 * B[i-1,j-1]
                         K[l] += nxt[i,j]
@@ -101,6 +101,6 @@ class SubstringKernel():
             K[l] /= lambd ** (2*(l+1))
             prev = nxt.copy()
         return K[-1]
-    
+
     def computeKernel(self, args):
         return self._computeKernel(args, self.lambd, self.n)

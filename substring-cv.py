@@ -3,7 +3,7 @@
 If kernels are not already computed in `kernels/`,
 compute.
 """
-
+import sys
 import multiprocessing as mp
 import time
 from importlib import reload
@@ -14,6 +14,7 @@ import numpy as np
 import pandas as pd
 from tqdm import tqdm
 
+sys.path.append('code')
 import algos
 import io_utils
 import kernels
@@ -26,7 +27,7 @@ SAVE = True
 
 KERNEL = "SS"
 
-for L in [3, 5, 7, 9]:
+for L in [3, 7, 9]:
     for W in [0.1, 0.3, 0.5, 0.7]:
 
         if KERNEL == "WD":
@@ -56,7 +57,7 @@ for L in [3, 5, 7, 9]:
 
         lambda_vals = np.logspace(LAMBDA_LOW, LAMBDA_HIGH, TRIALS)
 
-        krr = algos.SVM()
+        krr = algos.KernelRidgeRegression()
         best_id, errors = krr.cross_validate(
             exp, training_kernels, lambda_vals, verbose=False, fit_bias=False
         )
