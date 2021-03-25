@@ -36,7 +36,8 @@ print("Testing learning algorithms...")
 
 grid = np.logspace(-5, 1, 5)
 krr = algos.KernelRidgeRegression()
-best_idx_param = krr.cross_validate(exp, loaded_gaussian_train, grid)
+avg_score = krr.cross_validate(exp, loaded_gaussian_train, grid)
+best_idx_param = 0
 
 for i in range(3):
     krr.fit(loaded_gaussian_train[i], exp.labels[i], grid[best_idx_param])
@@ -45,7 +46,9 @@ for i in range(3):
 # Test SVM
 grid = np.logspace(-5, 1, 2) #SVM is slow...
 svm = algos.SVM()
-best_idx_param = svm.cross_validate(exp, loaded_gaussian_train, grid)
+avg_score = svm.cross_validate(exp, loaded_gaussian_train, grid)
+best_idx_param = 0
+
 for i in range(3):
     svm.fit(loaded_gaussian_train[i], exp.labels[i], grid[best_idx_param])
     predictions = svm.predict(gaussian_test[i])
